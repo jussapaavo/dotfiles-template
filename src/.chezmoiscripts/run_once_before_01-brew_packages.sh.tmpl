@@ -1,0 +1,12 @@
+{{- if or (eq .chezmoi.os "darwin") .is_wsl -}}
+#!/bin/bash
+
+# Set Brewfile locations
+BREWFILE={{ .chezmoi.sourceDir }}/utils/Brewfile
+
+# Install Brewfile.core
+if test $(brew bundle check --file=$BREWFILE); then
+    brew bundle --no-lock --file=$BREWFILE
+fi
+
+{{ end -}}

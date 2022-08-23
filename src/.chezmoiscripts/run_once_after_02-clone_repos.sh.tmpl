@@ -1,0 +1,16 @@
+{{- if and .is_standard .is_wsl -}}
+#!/bin/sh
+
+# Create dev directories
+
+echo "Creating directories..."
+mkdir -p {{ .chezmoi.homeDir }}/Development
+mkdir -p {{ .chezmoi.homeDir }}/Development/Personal
+mkdir -p {{ .chezmoi.homeDir }}/Development/Work
+
+# Clone git repositories
+
+echo "Cloning repositories..."
+PERSONAL=$HOME/Development/Personal
+
+{{ end -}}

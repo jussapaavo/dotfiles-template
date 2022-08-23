@@ -1,0 +1,17 @@
+# Taps
+tap 'homebrew/cask'
+tap 'homebrew/cask-versions'
+tap 'homebrew/bundle'
+
+# Binaries
+brew 'bash' # Latest Bash version
+brew 'git'
+brew 'gnupg'
+brew 'grep' # Global Regural Expression Print
+
+# Development
+brew 'gh' # GitHub CLI
+brew 'hub' # GitHub CLI extensions
+brew 'terragrunt'
+cask 'docker' # Docker Desktop
+cask 'google-cloud-sdk'

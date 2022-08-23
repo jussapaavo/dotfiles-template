@@ -1,0 +1,13 @@
+extensions=(
+  paths
+  aliases
+  functions
+  ohmyzsh
+{{- if or (eq .chezmoi.os "darwin") .is_wsl }}
+  plugins
+{{ end -}}
+)
+
+for extension in $extensions; do
+  source ~/.config/sh/$extension.sh
+done

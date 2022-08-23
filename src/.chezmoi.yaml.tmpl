@@ -1,0 +1,94 @@
+{{- /* Checks if running interactively, which is not the case for GitHub Codespaces */ -}}
+{{- $interactive := stdinIsATTY -}}
+
+{{/* boolean feature tags */}}
+{{- $is_arm := false -}}       {{/* true if this machine has ARM chip (Apple Silicon, M1, etc) */}}
+{{- $is_wsl := false -}}       {{/* true if this machine is run inside Windows as Linux subsystem */}}
+{{- $is_headless := false -}}  {{/* true if this machine does not have a screen and keyboard */}}
+{{- $is_ephemeral := false -}} {{/* true if this machine is ephemeral, e.g. a cloud or VM instance */}}
+{{- $is_codespace := false -}} {{/* true if this machine is run as a GitHub Codespace, VSCode Remote Container etc */}}
+{{- $is_standard := false -}}  {{/* true if this machine is a standard computer with full functionality */}}
+{{- $is_for_work := false -}}  {{/* true if this machine is owned by SOK */}}
+
+{{/* detect GitHub codespaces, VSCode remote containers, Docker containers, and Vagrant boxes */}}
+{{- if or (env "CODESPACES") (env "REMOTE_CONTAINERS_IPC") (eq .chezmoi.username "root" "vagrant" "vscode") -}}
+{{-   $is_codespace = true -}}
+{{-   $is_ephemeral = true -}}
+{{- end -}}
+
+{{/* detect Windows Subsystem for Linux (WSL) */}}
+{{- if (eq .chezmoi.os "linux") -}}
+{{-   if (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
+{{-     $is_wsl = true -}}
+{{-   end -}}
+{{- end -}}
+
+{{- /* detect the scope of functionality */ -}}
+{{- if not $is_ephemeral -}}
+{{-   if eq .chezmoi.os "darwin" "windows" -}}
+{{-     $is_standard = true -}}
+{{-     if eq .chezmoi.arch "arm" "arm64" -}}
+{{-       $is_arm = true -}}
+{{-     end -}}
+{{-   else if stdinIsATTY -}}
+{{-     if hasKey . "is_headless" -}}
+{{-       $is_headless = .is_headless -}}
+{{-     else -}}
+{{-       $is_headless = promptBool "is_headless" -}}
+{{-     end -}}
+{{-     if hasKey . "is_ephemeral" -}}
+{{-       $is_ephemeral = .is_ephemeral -}}
+{{-     else -}}
+{{-       $is_ephemeral = promptBool "is_ephemeral" -}}
+{{-     end -}}
+{{-   else -}}
+{{-     $is_headless = true -}}
+{{-     $is_ephemeral = true -}}
+{{-   end -}}
+{{- else if and (not .is_codespace) (not .is_wsl) (not .is_ephemeral) (not .is_headless) -}}
+{{-   $is_standard = true -}}
+{{- end -}}
+
+{{- /* Initializes the name variable with a default value */ -}}
+{{- $name := "<first name> <last name>" -}}
+{{- /* If name was previously set, reuses it */ -}}
+{{- if hasKey . "name" -}}
+{{-   $name = .name -}}
+{{- /* Otherwise, if running interactively, prompts for a name */ -}}
+{{- else if $interactive -}}
+{{-   $name = promptString "name" -}}
+{{- end -}}
+
+{{- /* Does the same for the email */ -}}
+{{- $email := "<email>" -}}
+{{- if hasKey . "email" -}}
+{{-   $email = .email -}}
+{{- else if $interactive -}}
+{{-   $email = promptString "personal email" -}}
+{{- end -}}
+
+{{- /* Does the same for the work email */ -}}
+{{- $email_work := "<work email>" -}}
+{{- if hasKey . "email_work" -}}
+{{-   $email_work = .email_work -}}
+{{- else if $interactive -}}
+{{-   $email_work = promptString "work email" -}}
+{{- end -}}
+
+{{- if $interactive -}}
+{{-   writeToStdout "💡 Tip: you can re-enter your name and email with `chezmoi init --data=false`.\n" -}}
+{{- end -}}
+
+sourceDir: {{ $.chezmoi.sourceDir | quote }}
+
+data:
+  name: {{ $name | quote }}
+  email: {{ $email | quote }}
+  email_work: {{ $email_work | quote }}
+  is_work: {{ $is_work }}
+  is_standard: {{ $is_standard }}
+  is_arm: {{ $is_arm }}
+  is_wsl: {{ $is_wsl }}
+  is_headless: {{ $is_headless }}
+  is_ephemeral: {{ $is_ephemeral }}
+  is_codespace: {{ $is_codespace }}

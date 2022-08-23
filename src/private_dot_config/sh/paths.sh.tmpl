@@ -1,0 +1,14 @@
+#!/bin/sh
+
+{{ if .is_arm -}}
+# Add Homebrew path for Apple Silicon.
+export PATH=/opt/homebrew/bin:$PATH
+{{- end }}
+
+{{ if or (eq .chezmoi.os "darwin") .is_wsl -}}
+# pipenv
+export PATH={{ .chezmoi.homeDir }}/.local/bin:$PATH
+
+# pyenv
+export PATH={{ .chezmoi.homeDir }}/.pyenv/shims:$PATH
+{{- end }}

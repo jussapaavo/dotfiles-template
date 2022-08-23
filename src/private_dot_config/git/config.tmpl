@@ -1,0 +1,37 @@
+[init]
+  defaultBranch = main
+
+[color]
+  ui = true
+
+[color "status"]
+  added = green
+  changed = yellow
+  untracked = red
+
+[core]
+	excludesfile = {{ .chezmoi.homeDir }}/.config/git/ignore
+
+[rerere]
+  enabled = true
+
+[commit]
+  verbose = true
+
+[push]
+  default = current
+
+[pull]
+	rebase = true
+
+[user]
+	name = {{ .name }}
+	email = {{ .email }}
+
+{{ if or (eq .chezmoi.os "darwin") .is_wsl -}}
+[includeIf "gitdir/i:**/Work/"]
+	path = {{ .chezmoi.homeDir }}/.config/git/config-work
+
+[credential]
+  helper = osxkeychain
+{{ end -}}
